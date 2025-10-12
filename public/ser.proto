@@ -1,0 +1,8 @@
+package serpackage;
+
+syntax = 'proto3';
+
+message Image {
+    bytes imagedata = 1;
+    int32 id = 2;
+}
