@@ -3,7 +3,7 @@ export type Url = {
   url: string;
 };
 
-export type YoutubeId = {
+export type Youtube = {
   url:string;
   videoId:string;
 }

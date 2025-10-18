@@ -1,16 +1,15 @@
 "use client";
 
 import { useSocketIo } from "@/hooks/socket-hoook";
-import { useStartTwilio } from "@/hooks/twilio-hooks";
-import { useRTCPeerConnection } from "@/hooks/web-rtc/web-rtc-hooks";
-import { connectWebRtcUrl } from "@/hooks/web-rtc/web-rtc-url";
+import { connectToTwilio, CustomLocalParticipant } from "@/utils/twilio";
+import { connectWebRtcUrl } from "@/utils/web-rtc/web-rtc-url";
 import { useEffect, useState } from "react";
-import { LocalParticipant } from "twilio-video";
-import { CustomLocalParticipant } from "./helper-types";
 import useCustomLocalStorage from "./local-storage";
 import MenuBar from "./menu-bar";
 import ParticipantComponent from "./participant-component";
 import { Url } from "@/utils/helper-types";
+import { Room as TwilioRoom } from "twilio-video";
+import { webrtcError } from "@/utils/console-logs";
 
 type Props = {
   username: string;
@@ -21,40 +20,59 @@ type Props = {
 };
 
 export default function Room({ domainAPI, username, token, domainSocketio }: Props) {
-  const [cameraInfo, microphoneInfo, urls, youtube] = useCustomLocalStorage();
-
-  if (username.length === 0) throw new Error("error 2");
+  const [urls, youtube] = useCustomLocalStorage();
   const socket = useSocketIo(`${domainSocketio}`, username);
-  const [cameraWebTrack, setCameraWebTrack] = useState<MediaStreamTrack>();
   const [participants, setParticipants] = useState<CustomLocalParticipant[]>([]);
-  const [localParticipant, setLocalParticipant] = useState<LocalParticipant | null>(null);
+  const [isConnected, setIsConnected] = useState<boolean>(false)
 
-  useStartTwilio(cameraInfo, token, "test", setParticipants, microphoneInfo, setLocalParticipant, cameraWebTrack);
-
-  useRTCPeerConnection({
-    setCameraWebTrack,
-    deviceInfo: cameraInfo,
-    username,
-    url: `${domainAPI}/offer`,
-  });
+  useEffect(()=>{
+    document.cookie = "inside=false"
+    window.addEventListener("beforeunload", (event) => {
+      document.cookie = "inside=true"
+      event.preventDefault()
+    })
+  }, [])
 
   useEffect(() => {
-    if (!urls || localParticipant?.state !== "connected") return;
-    urls.forEach((url) => {
-      connectWebRtcUrl(`${domainAPI}/offer`, "test", url, "videocamera");
+    let room:TwilioRoom | null = null
+    connectToTwilio(token, "test", setParticipants)
+    .then((twilioRoom) => {
+      room = twilioRoom
+      setIsConnected(true)
     });
-  }, [urls, localParticipant]);
+
+    return ()=> {
+      if(room) room.disconnect()
+    }
+  }, [])
 
 
   useEffect(() => {
-    if (!urls || localParticipant?.state !== "connected") return;
-    youtube.forEach((item) => {
+    if (!urls || !isConnected) return;
+    const connections:RTCPeerConnection[] = []
+    urls.forEach(async (url) => {
+      try {
+      const conn = await connectWebRtcUrl(`${domainAPI}/offer`, "test", url, "videocamera");
+      connections.push(conn)
+      }
+      catch(e){
+        webrtcError(`${url.url} raise error when connect to webrtc server`)
+      }
+    });
+
+  }, [urls, isConnected]);
+
+
+  useEffect(() => {
+    if (!urls || !isConnected) return;
+    const connections:RTCPeerConnection[] = []
+    youtube.forEach(async (item) => {
       const url:Url = {url:item.url, id:item.videoId}
-      connectWebRtcUrl(`${domainAPI}/offer`, "test", url, "youtube");
+      const conn = await connectWebRtcUrl(`${domainAPI}/offer`, "test", url, "youtube");
+      connections.push(conn)
     });
-  }, [urls, localParticipant]);
 
-  if (!cameraInfo || !microphoneInfo) return <></>;
+  }, [youtube, isConnected]);
 
   return (
     <div className="absolute top-0 left-0 gap-x-3 p-3 right-0 bottom-0 w-full h-full flex flex-row">

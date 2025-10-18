@@ -11,7 +11,7 @@ export default function Page() {
     const username = form.get("username");
     if (!username) throw Error("Username can not be empty");
     cookies().set("username", username.toString(), { httpOnly: true });
-    redirect("/preview-room");
+    redirect("/room");
   };
 
   return (

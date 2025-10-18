@@ -10,7 +10,8 @@ type Video = {
 }
 
 export async function getYoutubeVideos(videoIds:string[]):Promise<Video[] | undefined>{      
-    const response = await fetch(domainApi + "/youtube?video_ids="+videoIds.join(","), {
+    const query = videoIds.map(id => "video_ids="+id)
+    const response = await fetch(domainApi + "/youtube?"+query.join("&"), {
       method: "GET",
       headers:{
         "Content-Type": "application/json"

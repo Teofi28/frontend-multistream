@@ -2,13 +2,13 @@
 
 import { generateYoutubeVideo } from "@/api";
 import Button from "@/components/button";
-import { Url, YoutubeId } from "@/utils/helper-types";
+import { Url, Youtube } from "@/utils/helper-types";
 import { useEffect, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
 export default function InputUrl() {
   const [urls, setUrls] = useState<Url[]>([]);
-  const [youtubeIds, setYoutubeIds] = useState<YoutubeId[]>([]);
+  const [youtubeObjects, setYoutubeObjects] = useState<Youtube[]>([]);
   const formRef = useRef<HTMLFormElement | null>(null)
 
 
@@ -17,8 +17,8 @@ export default function InputUrl() {
   }, [urls]);
 
   useEffect(()=>{
-    localStorage.setItem("youtubeIds", JSON.stringify(youtubeIds))
-  }, [youtubeIds])
+    localStorage.setItem("youtubeObjects", JSON.stringify(youtubeObjects))
+  }, [youtubeObjects])
 
   return (
     <>
@@ -37,7 +37,7 @@ export default function InputUrl() {
               alert("Youtube Url is not recognized")
               return
             }
-            setYoutubeIds(prev => [...prev, {videoId:youtubeVideoId, url}])
+            setYoutubeObjects(prev => [...prev, {videoId:youtubeVideoId, url}])
             formRef.current?.reset()
             return
           }
@@ -46,7 +46,6 @@ export default function InputUrl() {
           formRef.current?.reset()
         }}
       >
-        <label className="text-3xl text-white">Add URL Stream</label>
         <div className="flex gap-x-4">
           <input name="url" type="url" placeholder="Enter URL here" className="bg-[#430B1E] text-white rounded-md p-4 w-full" />
           <Button type="submit">Submit</Button>
@@ -58,7 +57,7 @@ export default function InputUrl() {
             {url}
           </p>
         ))}
-        {youtubeIds.map(({ url, videoId }) => (
+        {youtubeObjects.map(({ url, videoId }) => (
           <p className="text-white" key={videoId}>
             {url}
           </p>

@@ -25,8 +25,6 @@ export function useSocketIo(url: string, username: string) {
       connection.emit("on_join", username);
       setSocket(connection);
     });
-    connection.on("connect_error", () => {});
-    connection.on("error", () => {});
     return () => {
       connection.close();
     };

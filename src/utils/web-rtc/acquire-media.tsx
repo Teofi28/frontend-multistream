@@ -5,7 +5,6 @@ type Props = {
   username: string;
   url: string;
   reconnect?: (error: string) => void;
-  deviceInfo?: MediaDeviceInfo;
   body?: {};
 };
 
@@ -14,23 +13,10 @@ export default async function acquireMedia({
   username,
   url,
   reconnect,
-  deviceInfo,
   body = { input_type: "cameraweb" },
 }: Props) {
   if (rtcConnection.connectionState === "connected") return;
-  if (deviceInfo) {
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: {
-        deviceId: { exact: deviceInfo.deviceId },
-      },
-    });
-
-    stream.getTracks().forEach((track) => {
-      rtcConnection.addTrack(track, stream);
-    });
-  } else {
-    rtcConnection.addTransceiver("video", { direction: "recvonly" });
-  }
+  rtcConnection.addTransceiver("video", { direction: "recvonly" });
   rtcConnection
     .createOffer({ iceRestart: true })
     .then((offer) => rtcConnection.setLocalDescription(offer))
