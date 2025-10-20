@@ -7,7 +7,6 @@ import { useEffect, useState } from "react";
 import useCustomLocalStorage from "./local-storage";
 import MenuBar from "./menu-bar";
 import ParticipantComponent from "./participant-component";
-import { Url } from "@/utils/helper-types";
 import { Room as TwilioRoom } from "twilio-video";
 import { webrtcError } from "@/utils/console-logs";
 
@@ -20,7 +19,7 @@ type Props = {
 };
 
 export default function Room({ domainAPI, username, token, domainSocketio }: Props) {
-  const [urls, youtube] = useCustomLocalStorage();
+  const [urls] = useCustomLocalStorage();
   const socket = useSocketIo(`${domainSocketio}`, username);
   const [participants, setParticipants] = useState<CustomLocalParticipant[]>([]);
   const [isConnected, setIsConnected] = useState<boolean>(false)
@@ -44,7 +43,7 @@ export default function Room({ domainAPI, username, token, domainSocketio }: Pro
     return ()=> {
       if(room) room.disconnect()
     }
-  }, [])
+  }, [token])
 
 
   useEffect(() => {
@@ -60,19 +59,8 @@ export default function Room({ domainAPI, username, token, domainSocketio }: Pro
       }
     });
 
-  }, [urls, isConnected]);
+  }, [urls, isConnected, domainAPI]);
 
-
-  useEffect(() => {
-    if (!urls || !isConnected) return;
-    const connections:RTCPeerConnection[] = []
-    youtube.forEach(async (item) => {
-      const url:Url = {url:item.url, id:item.videoId}
-      const conn = await connectWebRtcUrl(`${domainAPI}/offer`, "test", url, "youtube");
-      connections.push(conn)
-    });
-
-  }, [youtube, isConnected]);
 
   return (
     <div className="absolute top-0 left-0 gap-x-3 p-3 right-0 bottom-0 w-full h-full flex flex-row">

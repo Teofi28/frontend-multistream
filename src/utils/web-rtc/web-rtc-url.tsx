@@ -29,12 +29,11 @@ export async function connectWebRtcUrl(urlWebrtc: string, room: string, url: Url
       // twilioRoom.disconnect()
     }
   })
-  const body = input_type === "videocamera" ?  { input_type, url: url.url }:{input_type, video_id:url.id}
   await acquireMedia({
     rtcConnection: pc,
     username: url.id,
     url: urlWebrtc,
-    body,
+    body:{input_type, url_or_file: url.url}
   });
   return pc
 }
