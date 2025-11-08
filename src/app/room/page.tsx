@@ -1,19 +1,16 @@
-import { generateSignature } from "@/utils/generate-token";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
-import Room from "./room";
+import InsideRoom from "./_inside";
+import PreviewRoom from "./_preview";
 
-export default function Page() {
-  const username = cookies().get("username")?.value;
+export default function Page({ searchParams }: {
+  searchParams: { state: string | string[] | undefined }
+}){
 
-  if (!username) redirect("/");
-  return (
-    <Room
-      domainAPI={process.env.DOMAIN_API ?? ""}
-      domainWebsocket={process.env.DOMAIN_WEBSOCKET ?? ""}
-      domainSocketio={process.env.DOMAIN_SOCKETIO ?? ""}
-      username={username}
-      token={generateSignature(username, "test")}
-    />
-  );
+  const state = searchParams.state;
+  const data = cookies().get("inside")?.value
+  if(!state || state === "preview" || data === "true"){
+    return <PreviewRoom />
+  }
+  return <InsideRoom />
+
 }
