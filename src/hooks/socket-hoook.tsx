@@ -1,6 +1,6 @@
 import { info } from "@/utils/console-logs";
-import { useEffect, useState } from "react";
-import { io, Socket } from "socket.io-client";
+import { useEffect, useMemo, useState } from "react";
+import { io } from "socket.io-client";
 
 export default function useSocket(url: string) {
   const [socket, setSocket] = useState<WebSocket | null>(null);
@@ -16,18 +16,18 @@ export default function useSocket(url: string) {
 }
 
 export function useSocketIo(url: string, username: string) {
-  const [socket, setSocket] = useState<Socket | null>(null);
+  const socket = useMemo(() => io(url, {autoConnect: false}), [url])
   useEffect(() => {
     if (!username) return;
-    const connection = io(url);
-    connection.on("connect", () => {
+    socket.on("connect", () => {
       info("SOCKET IO", username, "is connected");
-      connection.emit("on_join", username);
-      setSocket(connection);
+      socket.emit("on_join", username);
     });
+    socket.connect()
     return () => {
-      connection.close();
+      socket.off("connect")
+      socket.close();
     };
-  }, [url, username]);
+  }, [url, username, socket]);
   return socket;
 }
