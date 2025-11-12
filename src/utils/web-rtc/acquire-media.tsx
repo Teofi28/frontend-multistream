@@ -13,7 +13,7 @@ export default async function acquireMedia({
   username,
   url,
   reconnect,
-  body = { input_type: "cameraweb" },
+  body,
 }: Props) {
   if (rtcConnection.connectionState === "connected") return;
   rtcConnection.addTransceiver("video", { direction: "recvonly" });

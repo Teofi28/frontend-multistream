@@ -33,7 +33,7 @@ export async function connectWebRtcUrl(urlWebrtc: string, room: string, url: Url
     rtcConnection: pc,
     username: url.id,
     url: urlWebrtc,
-    body:{input_type, url_or_file: url.url}
+    body:{url: url.url}
   });
   return pc
 }
