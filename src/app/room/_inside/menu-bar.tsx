@@ -104,9 +104,10 @@ export default function MenuBar({ socket, username }: Props) {
           <input className="text-black border-[2px] rounded-xl border-orange-500" value={ids} onChange={(ev) => setIds(ev.target.value)} placeholder="ids" />
           <button
             onClick={() => {
+              const trackIds = ids === "all" ? "all":ids.split(",").map(toInteger)
               socket.emit("on_box", {
                 user,
-                trackIds: ids.split(",").map(toInteger),
+                trackIds,
               });
               setIds("");
             }}
