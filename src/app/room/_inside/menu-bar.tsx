@@ -35,6 +35,16 @@ export default function MenuBar({ socket, username }: Props) {
     <div className="flex flex-col max-w-[30%] md:max-w-[22%]">
       <div className="bg-[#24221b] border-[4px] gap-y-2 border-orange-700 rounded-2xl  text-white  p-3 flex flex-col  h-1px flex-grow md:h-max overflow-y-scroll">
         <LabelBar text={`User Id: ${username}`} />
+        <LabelBar text="Goal 1" />
+        <input
+          className="border-[2px] rounded-xl border-orange-500 text-black"
+          onChange={(event) => setObjetivo(event.target.value)}
+          placeholder="id Number"
+        />
+        <div className="flex flex-row">
+          <button>Add</button>
+          <button>Off</button>
+        </div>
         <div className="flex flex-col">
           <LabelBar text="Input1" />
           <input
@@ -94,9 +104,10 @@ export default function MenuBar({ socket, username }: Props) {
           <input className="text-black border-[2px] rounded-xl border-orange-500" value={ids} onChange={(ev) => setIds(ev.target.value)} placeholder="ids" />
           <button
             onClick={() => {
+              const trackIds = ids === "all" ? "all":ids.split(",").map(toInteger)
               socket.emit("on_box", {
                 user,
-                trackIds: ids.split(",").map(toInteger),
+                trackIds,
               });
               setIds("");
             }}
