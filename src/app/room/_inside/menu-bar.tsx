@@ -1,4 +1,3 @@
-import RedirectFeedbackButton from "@/components/button/redirect-feedback-button";
 import { toInteger } from "lodash";
 import Image from "next/image";
 import { useState } from "react";
@@ -8,9 +7,10 @@ import LabelBar from "./label-bar";
 type Props = {
   socket: Socket;
   username: string;
+  logs: string[]
 };
 
-export default function MenuBar({ socket, username }: Props) {
+export default function MenuBar({ socket, username, logs }: Props) {
   const [ids, setIds] = useState<string>("");
   const [objetivo, setObjetivo] = useState<string>("");
   const [input1, setInput1] = useState<string>("");
@@ -33,7 +33,7 @@ export default function MenuBar({ socket, username }: Props) {
 
   return (
     <div className="flex flex-col max-w-[30%] md:max-w-[22%]">
-      <div className="bg-[#24221b] border-[4px] gap-y-2 border-orange-700 rounded-2xl  text-white  p-3 flex flex-col  h-1px flex-grow md:h-max overflow-y-scroll">
+      <div className="bg-[#24221b] border-[4px] gap-y-2 border-orange-700 rounded-2xl  text-white  p-3 flex flex-col  h-1px md:h-max">
         <LabelBar text={`User Id: ${username}`} />
         <LabelBar text="Goal 1" />
         <input
@@ -83,7 +83,7 @@ export default function MenuBar({ socket, username }: Props) {
                 sendAllData("center");
               }}
               className="p-2"
-            >
+            > 
               <Image src={"/enter.png"} width={30} height={30} alt="" />
             </button>
             <button onClick={() => sendAllData("RIGHT")}>
@@ -115,7 +115,9 @@ export default function MenuBar({ socket, username }: Props) {
             Go
           </button>
         </div>
-        <RedirectFeedbackButton className="w-full" />
+        <div className="bg-white h-52 overflow-y-scroll">
+        {logs.map((log, index) => <p className="text-black break-all text-sm border-black border-b-[1px]" key={index}>{log}</p>)}
+        </div>
       </div>
     </div>
   );

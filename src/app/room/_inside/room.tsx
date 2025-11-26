@@ -8,7 +8,6 @@ import useCustomLocalStorage from "./local-storage";
 import MenuBar from "./menu-bar";
 import ParticipantComponent from "./participant-component";
 import { Room as TwilioRoom } from "twilio-video";
-import { webrtcError } from "@/utils/console-logs";
 
 type Props = {
   username: string;
@@ -23,6 +22,7 @@ export default function Room({ domainAPI, username, token, domainSocketio }: Pro
   const socket = useSocketIo(`${domainSocketio}`, username);
   const [participants, setParticipants] = useState<CustomLocalParticipant[]>([]);
   const [isConnected, setIsConnected] = useState<boolean>(false)
+  const [logs, setLogs] = useState<string[]>([]); 
 
   useEffect(()=>{
     document.cookie = "inside=false"
@@ -48,15 +48,8 @@ export default function Room({ domainAPI, username, token, domainSocketio }: Pro
 
   useEffect(() => {
     if (!urls || !isConnected) return;
-    const connections:RTCPeerConnection[] = []
-    urls.forEach(async (url) => {
-      try {
-      const conn = await connectWebRtcUrl(`${domainAPI}/offer`, "test", url, "videocamera");
-      connections.push(conn)
-      }
-      catch(e){
-        webrtcError(`${url.url} raise error when connect to webrtc server`)
-      }
+    urls.forEach((url) => {
+      connectWebRtcUrl(`${domainAPI}/offer`, "test", url, (message) => setLogs(prev => [...prev, message]))
     });
 
   }, [urls, isConnected, domainAPI]);
@@ -64,7 +57,7 @@ export default function Room({ domainAPI, username, token, domainSocketio }: Pro
 
   return (
     <div className="absolute top-0 left-0 gap-x-3 p-3 right-0 bottom-0 w-full h-full flex flex-row">
-      {socket && <MenuBar socket={socket} username={username} />}
+      {socket && <MenuBar socket={socket} username={username} logs={logs} />}
       <div className=" flex flex-col h-full bg-red-50 flex-grow ">
         <div className="flex flex-row flex-grow flex-wrap overflow-y-scroll justify-center items-center">
           {participants.map((participant) => (
