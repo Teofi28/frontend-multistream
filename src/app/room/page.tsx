@@ -8,6 +8,7 @@ export default function Page({ searchParams }: {
 
   const state = searchParams.state;
   const data = cookies().get("inside")?.value
+  console.log(data, state)
   if(!state || state === "preview" || data === "true"){
     return <PreviewRoom />
   }

@@ -14,7 +14,5 @@ export default function RedirectButton({ href, text }: Props) {
     document.cookie = "inside=false";
   }, [])
   const { replace } = useRouter();
-  return <Button onClick={() => {
-    replace(href)
-  }}>{text}</Button>;
+  return <Button onClick={() => replace(href)}>{text}</Button>;
 }

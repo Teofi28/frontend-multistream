@@ -4,7 +4,7 @@ type Props = {
   rtcConnection: RTCPeerConnection;
   username: string;
   url: string;
-  reconnect?: (error: string) => void;
+  onError?: (error: string) => void;
   body?: {};
 };
 
@@ -12,7 +12,7 @@ export default async function acquireMedia({
   rtcConnection,
   username,
   url,
-  reconnect,
+  onError,
   body,
 }: Props) {
   if (rtcConnection.connectionState === "connected") return;
@@ -38,7 +38,7 @@ export default async function acquireMedia({
         })
           .then((response) => response.json())
           .then((answer) => rtcConnection.setRemoteDescription(answer))
-          .catch(reconnect);
+          .catch(onError);
       };
       if (rtcConnection.iceGatheringState === "complete") {
         resolve();
@@ -56,5 +56,5 @@ export default async function acquireMedia({
         rtcConnection.addEventListener("icegatheringstatechange", checkstate);
       }
     })
-    .catch(reconnect);
+    .catch(onError);
 }
