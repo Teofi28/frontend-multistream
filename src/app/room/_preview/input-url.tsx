@@ -23,6 +23,7 @@ export default function InputUrl() {
           const existId = urls.some(url => url.id === urlId.toString())
           if(existId){
             alert("Id has been added")
+            return
           }
           const url = urlForm.toString()
           const id = urlId.toString();
