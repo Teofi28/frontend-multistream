@@ -6,7 +6,16 @@ import { useEffect, useRef, useState } from "react";
 
 export default function InputUrl() {
   const [urls, setUrls] = useState<Url[]>([]);
-  const formRef = useRef<HTMLFormElement | null>(null)
+  const formRef = useRef<HTMLFormElement | null>(null);
+
+  useEffect(() => {
+    let storedRoomId = localStorage.getItem("roomId");
+
+    if (!storedRoomId) {
+      storedRoomId = crypto.randomUUID();
+      localStorage.setItem("roomId", storedRoomId);
+    }
+  }, []);
 
   useEffect(() => {
     localStorage.setItem("urls", JSON.stringify(urls));

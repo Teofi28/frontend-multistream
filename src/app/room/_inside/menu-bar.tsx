@@ -7,10 +7,11 @@ import LabelBar from "./label-bar";
 type Props = {
   socket: Socket;
   username: string;
+  roomId: string;
   logs: string[]
 };
 
-export default function MenuBar({ socket, username, logs }: Props) {
+export default function MenuBar({ socket, username,roomId,logs }: Props) {
   const [ids, setIds] = useState<string>("");
   const [objetivo, setObjetivo] = useState<string>("");
   const [input1, setInput1] = useState<string>("");
@@ -20,6 +21,7 @@ export default function MenuBar({ socket, username, logs }: Props) {
 
   const sendAllData = (direction: string) => {
     socket.emit("on_direction", {
+      roomId,
       user,
       value: {
         objetivo,
@@ -106,6 +108,7 @@ export default function MenuBar({ socket, username, logs }: Props) {
             onClick={() => {
               const trackIds = ids === "all" ? "all":ids.split(",").map(toInteger)
               socket.emit("on_box", {
+                roomId,
                 user,
                 trackIds,
               });
