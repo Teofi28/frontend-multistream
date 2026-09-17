@@ -4,10 +4,11 @@ import { useSocketIo } from "@/hooks/socket-hoook";
 import { connectToTwilio, CustomLocalParticipant } from "@/utils/twilio";
 import { connectWebRtcUrl } from "@/utils/web-rtc/web-rtc-url";
 import { useEffect, useState } from "react";
-import useCustomLocalStorage from "./local-storage";
+import useRoomCameras from "./local-storage";
 import MenuBar from "./menu-bar";
 import ParticipantComponent from "./participant-component";
 import { Room as TwilioRoom } from "twilio-video";
+import { Url } from "@/utils/helper-types";
 
 type Props = {
   username: string;
@@ -17,19 +18,11 @@ type Props = {
 };
 
 export default function Room({ domainAPI, username, domainSocketio }: Props) {
-  const [urls, roomId] = useCustomLocalStorage();
+  const [urls, roomId] = useRoomCameras(domainAPI);
   const socket = useSocketIo(`${domainSocketio}`, username);
   const [participants, setParticipants] = useState<CustomLocalParticipant[]>([]);
   const [isConnected, setIsConnected] = useState<boolean>(false)
   const [logs, setLogs] = useState<string[]>([]); 
-
-  useEffect(()=>{
-    document.cookie = "inside=false"
-    window.addEventListener("beforeunload", (event) => {
-      document.cookie = "inside=true"
-      event.preventDefault()
-    })
-  }, [])
 
   useEffect(() => {
     if (!roomId) return;
@@ -95,7 +88,7 @@ export default function Room({ domainAPI, username, domainSocketio }: Props) {
 
   return (
     <div className="absolute top-0 left-0 gap-x-3 p-3 right-0 bottom-0 w-full h-full flex flex-row">
-      {socket && <MenuBar socket={socket} username={username} roomId={roomId} logs={logs} />}
+      {socket && <MenuBar socket={socket} username={username} roomId={roomId} urls={urls} logs={logs} />}
       <div className=" flex flex-col h-full bg-red-50 flex-grow ">
         <div className="flex flex-row flex-grow flex-wrap overflow-y-scroll justify-center items-center">
           {participants.map((participant) => (

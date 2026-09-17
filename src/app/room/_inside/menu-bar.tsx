@@ -1,25 +1,51 @@
 import { toInteger } from "lodash";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
 import LabelBar from "./label-bar";
+import { Url } from "@/utils/helper-types";
 
 type Props = {
   socket: Socket;
   username: string;
   roomId: string;
-  logs: string[]
+  urls: Url[];
+  logs: string[];
 };
 
-export default function MenuBar({ socket, username,roomId,logs }: Props) {
+export default function MenuBar({ socket, username,roomId,urls,logs }: Props) {
   const [ids, setIds] = useState<string>("");
   const [objetivo, setObjetivo] = useState<string>("");
   const [input1, setInput1] = useState<string>("");
   const [input2, setInput2] = useState<string>("");
-  const [stepSize, setStepSize] = useState<string>("");
+  const [stepSize, setStepSize] = useState<string>("1");
   const [user, setUser] = useState<string>("");
 
+  const roomName =
+    urls.length > 0
+      ? urls[0].roomName
+      : `Room ${roomId}`;
+
+  useEffect(() => {
+    if (urls.length === 0) {
+      setUser("");
+      return;
+    }
+
+    const userExistsInRoom = urls.some(
+      (item) => item.id === user
+    );
+
+    if (!userExistsInRoom) {
+      setUser(urls[0].id);
+    }
+  }, [urls, user]);
+
   const sendAllData = (direction: string) => {
+    if (!user) {
+      alert("Please select a hardware device");
+      return;
+    }
     socket.emit("on_direction", {
       roomId,
       user,
@@ -37,6 +63,40 @@ export default function MenuBar({ socket, username,roomId,logs }: Props) {
     <div className="flex flex-col max-w-[30%] md:max-w-[22%]">
       <div className="bg-[#24221b] border-[4px] gap-y-2 border-orange-700 rounded-2xl  text-white  p-3 flex flex-col  h-1px md:h-max">
         <LabelBar text={`User Id: ${username}`} />
+
+        <div className="border-b border-orange-700 pb-2 mb-1">
+          <LabelBar text={`Room: ${roomName}`} />
+          <p className="text-xs text-gray-300">
+            Room ID: {roomId}
+          </p>
+        </div>
+
+        <div className="flex flex-col gap-y-1">
+          <LabelBar text="Hardware Devices" />
+
+          {urls.length === 0 ? (
+            <p className="text-sm text-gray-400">
+              No devices in this room
+            </p>
+          ) : (
+            urls.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setUser(item.id)}
+                className={`text-left px-2 py-1 rounded-md border ${
+                  user === item.id
+                    ? "bg-orange-600 border-orange-300 text-white"
+                    : "bg-[#3a372e] border-gray-600 text-white"
+                }`}
+              >
+                {user === item.id ? "● " : "○ "}
+                {item.id}
+              </button>
+            ))
+          )}
+        </div>
+
         <LabelBar text="Goal 1" />
         <input
           className="border-[2px] rounded-xl border-orange-500 text-black"
@@ -96,22 +156,27 @@ export default function MenuBar({ socket, username,roomId,logs }: Props) {
             <Image src={"/arrow.png"} width={40} height={40} alt="" className="rotate-180" />
           </button>
         </div>
-
-        <div className="flex flex-col">
-          <LabelBar text="Usuario Id" />
-          <input className="border-[2px] text-black rounded-xl border-orange-500" onChange={(event) => setUser(event.target.value)} placeholder="idMark" />
-        </div>
         <div className="flex flex-col">
           <LabelBar text="Ids" />
           <input className="text-black border-[2px] rounded-xl border-orange-500" value={ids} onChange={(ev) => setIds(ev.target.value)} placeholder="ids" />
           <button
             onClick={() => {
-              const trackIds = ids === "all" ? "all":ids.split(",").map(toInteger)
+              if (!user) {
+                alert("Please select a hardware device");
+                return;
+              }
+
+              const trackIds =
+                ids === "all"
+                  ? "all"
+                  : ids.split(",").map(toInteger);
+
               socket.emit("on_box", {
                 roomId,
                 user,
                 trackIds,
               });
+
               setIds("");
             }}
           >

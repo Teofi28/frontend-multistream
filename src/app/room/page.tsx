@@ -1,17 +1,28 @@
-import { cookies } from "next/headers";
 import InsideRoom from "./_inside";
 import PreviewRoom from "./_preview";
 
-export default function Page({ searchParams }: {
-  searchParams: { state: string | string[] | undefined }
-}){
-
+export default function Page({
+  searchParams,
+}: {
+  searchParams: {
+    state?: string | string[];
+    roomId?: string | string[];
+  };
+}) {
   const state = searchParams.state;
-  const data = cookies().get("inside")?.value
-  console.log(data, state)
-  if(!state || state === "preview" || data === "true"){
-    return <PreviewRoom />
-  }
-  return <InsideRoom />
+  const roomId = searchParams.roomId;
 
+  if (
+    !state ||
+    state === "preview" ||
+    !roomId
+  ) {
+    return <PreviewRoom />;
+  }
+
+  if (state === "inside") {
+    return <InsideRoom />;
+  }
+
+  return <PreviewRoom />;
 }
